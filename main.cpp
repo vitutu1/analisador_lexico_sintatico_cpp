@@ -24,12 +24,17 @@ int main(int argc, char **argv) {
 
     int result = parser.parse();
 
-    
+
     if (result == 0 && lexer.root) {
 
         std::cout << "\n--- Arvore Sintatica Completa (AST) ---\n";
         lexer.root->print();
         std::cout << "--------------------------------------\n";
+
+    
+        std::cout << "\n--- Codigo Gerado a partir da AST ---\n";
+        std::cout << lexer.root->codegen();
+        std::cout << "-------------------------------------\n";
 
         std::cout << "\nAvaliando o programa...\n";
         SymbolTable symbols;
