@@ -6,23 +6,23 @@
 #define YY_DECL int Lexer::yylex(parser::Parser::semantic_type* yylval, parser::Parser::location_type* yylloc)
 %}
 
-%option c++ noyywrap nounput noinput
+%option c++ nounput noinput noyywrap
 %option yyclass="Lexer"
 
 %%
 
 %{
-
-    yylloc->begin.column = m_column;
-    m_column += yyleng;
+    yylloc->begin.line = yylineno;
+    yylloc->begin.column = this->m_column;
+    this->m_column += yyleng;
 %}
 
-[ \t]+              { /* Ignora espaços */ }
+[ \t]+              { /* Ignora */ }
 
-\n+                 {
-                        yylineno += yyleng;
-                        m_column = 1;
-                        return '\n';
+\n+                 { 
+                        yylineno += yyleng; 
+                        this->m_column = 1; 
+                        return '\n'; 
                     }
 
 [0-9]+(\.[0-9]+)?   {
@@ -39,5 +39,6 @@
 
 %%
 
-
 Lexer::Lexer(std::istream& in) : yyFlexLexer(&in) {}
+
+/* A implementação de yywrap foi removida daqui */

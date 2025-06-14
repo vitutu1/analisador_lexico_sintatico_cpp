@@ -4,7 +4,6 @@
 #include "lexer.hpp"
 #include "parser.tab.hpp"
 
-
 int main(int argc, char **argv) {
     std::istream* input_stream = &std::cin;
     std::ifstream file;
@@ -17,7 +16,7 @@ int main(int argc, char **argv) {
         }
         input_stream = &file;
     } else {
-        std::cout << "Digite expressoes (Ctrl+D para finalizar):\n";
+        std::cout << "Digite seu programa (Ctrl+D para finalizar):\n";
     }
 
     Lexer lexer(*input_stream);
@@ -25,14 +24,21 @@ int main(int argc, char **argv) {
 
     int result = parser.parse();
 
+    
     if (result == 0 && lexer.root) {
-        std::cout << "\n--- Arvore Sintatica (AST) ---\n";
+
+        std::cout << "\n--- Arvore Sintatica Completa (AST) ---\n";
         lexer.root->print();
-        std::cout << "-----------------------------\n";
-        std::cout << "Analise bem-sucedida!" << std::endl;
-    } else if (result != 0) {
-        std::cout << "Analise finalizada com erros." << std::endl;
+        std::cout << "--------------------------------------\n";
+
+        std::cout << "\nAvaliando o programa...\n";
+        SymbolTable symbols;
+        double final_result = lexer.root->eval(symbols);
+
+        std::cout << "\n>>> Resultado da ultima expressao: " << final_result << std::endl;
     }
+
+    std::cout << "\nAnalise finalizada." << std::endl;
 
     return result;
 }

@@ -2,17 +2,15 @@
     #include <string>
     #include <memory>
     #include "ast.hpp"
-    class Lexer; // Declaração "forward" da classe Lexer.
+    class Lexer; 
 }
 
 %code {
     #include "lexer.hpp"
-    // Força o parser a chamar o método yylex do objeto lexer.
     #undef yylex
     #define yylex lexer.yylex
 }
 
-/* Configurações da API C++ moderna do Bison */
 %define api.parser.class {Parser}
 %define api.namespace {parser}
 %define api.value.type variant
@@ -25,9 +23,7 @@
 %token<std::string> NUMBER "number"
 %token END 0 "end of file"
 
-
-%type<ASTNodePtr> stmt expr
-
+%type<ASTNodePtr> stmt expr program
 
 %right '='
 %left '+' '-'
@@ -37,15 +33,25 @@
 %%
 
 program:
-    %empty
-    | program stmt
+    // Um programa começa com um nó de programa vazio.
+    %empty              { $$ = std::make_shared<ProgramNode>(); }
+    // A cada novo statement, adicionamos ele à lista do nó do programa.
+    | program stmt      {
+                            auto prog_node = std::dynamic_pointer_cast<ProgramNode>($1);
+                            if (prog_node && $2) {
+                                prog_node->statements.push_back($2);
+                            }
+                            $$ = prog_node;
+                            // A raiz do lexer sempre aponta para o nó do programa.
+                            lexer.root = $$;
+                        }
     ;
 
 stmt:
-    expr '\n'           { if ($1) lexer.root = $1; }
-    | ID '=' expr '\n'  { lexer.root = std::make_shared<BinOpNode>("=", std::make_shared<VarNode>($1), $3); }
-    | '\n'              { /* Linhas em branco são ignoradas */ }
-    | error '\n'        { yyerrok; /* Recuperação de erro simples */ }
+    expr '\n'           { $$ = $1; }
+    | ID '=' expr '\n'  { $$ = std::make_shared<BinOpNode>("=", std::make_shared<VarNode>($1), $3); }
+    | '\n'              { $$ = nullptr; }
+    | error '\n'        { yyerrok; $$ = nullptr; }
     ;
 
 expr:
