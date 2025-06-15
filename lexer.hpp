@@ -14,9 +14,11 @@ public:
     virtual ~Lexer() = default;
 
     virtual int yylex(
-        parser::Parser::semantic_type* yylval, 
+        parser::Parser::semantic_type* yylval,
         parser::Parser::location_type* yylloc
     );
+
+    int yywrap();
 
     SymbolTable symbols;
     ASTNodePtr root = nullptr;
@@ -25,4 +27,4 @@ private:
     int m_column = 1;
 };
 
-#endif 
+#endif
